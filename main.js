@@ -5,27 +5,30 @@ const bodyParser = require('body-parser');
 const app = express();
 const port = 3000;
 
-// Enable CORS
+// Enable CORS for all origins
 app.use(cors());
 
-// Middleware to handle various types of body content
+// Middleware to handle all data types
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.text());
 app.use(bodyParser.raw({ type: '*/*' }));
 
-// Variable to store last received data
+// Variable to store last received data as a string
 let lastReceivedDataString = null;
 
-// POST endpoint to receive data in any format
+// POST endpoint to receive any kind of data
 app.post('/api/data', (req, res) => {
   let receivedString;
 
   if (typeof req.body === 'string') {
+    // Text or raw string
     receivedString = req.body;
   } else if (Buffer.isBuffer(req.body)) {
+    // Raw binary data
     receivedString = req.body.toString('utf-8');
   } else if (typeof req.body === 'object') {
+    // JSON or form data
     receivedString = JSON.stringify(req.body);
   } else {
     receivedString = 'Unsupported data format';
@@ -35,41 +38,29 @@ app.post('/api/data', (req, res) => {
 
   console.log('Received via POST:', receivedString);
 
-  res.status(200).json({
-    message: 'Data received via POST',
-    receivedData: receivedString
-  });
+  res.status(200).send('Data received successfully');
 });
 
-// GET endpoint to receive data via query parameters (link)
+// GET endpoint to receive data via query string or return stored string
 app.get('/api/data', (req, res) => {
   if (Object.keys(req.query).length > 0) {
-    // Received data via query string
     const queryDataString = JSON.stringify(req.query);
     lastReceivedDataString = queryDataString;
 
-    console.log('Received via GET (link):', queryDataString);
+    console.log('Received via GET (query params):', queryDataString);
 
-    return res.status(200).json({
-      message: 'Data received via GET query parameters',
-      receivedData: queryDataString
-    });
+    return res.status(200).send(queryDataString); // Return as plain text
   }
 
-  // No query params; just return last POSTed data if any
   if (lastReceivedDataString) {
-    return res.status(200).json({
-      message: 'Previously received data',
-      receivedData: lastReceivedDataString
-    });
+    console.log('Returned stored data:', lastReceivedDataString);
+    return res.status(200).send(lastReceivedDataString); // Return as plain text
   }
 
-  // No data at all
-  res.status(404).json({
-    message: 'No data has been received yet'
-  });
+  res.status(404).send('No data has been received yet');
 });
 
+// Start the server
 app.listen(port, () => {
   console.log(`✅ Server running at http://localhost:${port}`);
 });

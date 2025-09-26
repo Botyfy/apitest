@@ -1,0 +1,22 @@
+<!doctype html>
+<html>
+<head>
+    <title>Shared Text Wall</title>
+</head>
+<body>
+    <h1>Post a Message</h1>
+    <form method="POST">
+        <textarea name="user_text" rows="4" cols="50" placeholder="Enter your message here..."></textarea><br>
+        <button type="submit">Submit</button>
+    </form>
+
+    <h2>All Messages:</h2>
+    <ul>
+        {% for text in texts %}
+            <li>{{ text }}</li>
+        {% else %}
+            <li>No messages yet.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
